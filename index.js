@@ -16,8 +16,9 @@ app.use(express.json());
 
 // Helper function to avoid code repetition
 async function getSheetData(sheetName, range) {
+  const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
   const auth = new google.auth.GoogleAuth({
-    keyFile: "credentials.json",
+    credentials,
     scopes: "https://www.googleapis.com/auth/spreadsheets",
   });
 
@@ -37,8 +38,9 @@ async function getSheetData(sheetName, range) {
 
 // Helper function to append data to sheet
 async function appendSheetData(sheetName, range, values) {
+  const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
   const auth = new google.auth.GoogleAuth({
-    keyFile: "credentials.json",
+    credentials,
     scopes: "https://www.googleapis.com/auth/spreadsheets",
   });
 
