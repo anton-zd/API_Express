@@ -3,7 +3,7 @@ const { google } = require("googleapis");
 
 const app = express();
 
-// Enable CORS manually (replace the cors() line)
+// Enable CORS manually (replace the cors() line.
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -84,8 +84,6 @@ async function appendSheetData(sheetName, range, values) {
   return response.data;
 }
 
-// ...existing code... (all your routes remain the same)
-
 // Original route for sellers data (column B)
 app.get("/", async (req, res) => {
   try {
@@ -104,6 +102,44 @@ app.get("/clients", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// NEW: POST endpoint to save client data to the 'clients' sheet
+app.post("/clients", async (req, res) => {
+    try {
+        // Hardcoded seller name as per UI
+        const sellerName = 'Raul Zarate'; 
+        
+        // Extract data from the request body
+        const { dni, clientName, quantity } = req.body;
+
+        // Basic validation to ensure required data is present
+        if (!dni || !clientName || quantity === null || quantity === undefined) {
+            return res.status(400).json({ error: 'DNI, Client Name, and Quantity are required.' });
+        }
+
+        // The name of the sheet is 'clients', and the range is A to D
+        const sheetName = 'clients';
+        const range = 'A:D';
+        
+        // Prepare the data to be appended to the sheet in the correct column order
+        const values = [[sellerName, dni, clientName, quantity]];
+
+        // Call the helper function to append the data
+        const result = await appendSheetData(sheetName, range, values);
+
+        console.log(`✅ Client data successfully saved`);
+
+        res.status(200).json({
+            message: 'Client data saved successfully',
+            data: { sellerName, dni, clientName, quantity },
+            updatedRows: result.updates.updatedRows
+        });
+
+    } catch (error) {
+        console.error('Error saving client data:', error);
+        res.status(500).json({ error: 'Internal server error: ' + error.message });
+    }
 });
 
 // NEW: POST endpoint to save seller data to sells sheet
